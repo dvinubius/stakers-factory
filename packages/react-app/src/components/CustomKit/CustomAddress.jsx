@@ -3,6 +3,7 @@ import React from "react";
 import Blockies from "react-blockies";
 import { useThemeSwitcher } from "react-css-theme-switcher";
 import { useLookupAddress } from "eth-hooks/dapps/ens";
+import "./CustomAddress.css";
 
 // changed value={address} to address={address}
 
@@ -55,8 +56,13 @@ export default function CustomAddress(props) {
     );
   }
 
+  const catchEvent = e => {
+    e.stopPropagation();
+    e.preventDefault();
+  };
+
   return (
-    <span style={{ display: "inline-flex", alignItems: "center" }}>
+    <span style={{ display: "inline-flex", alignItems: "center" }} onClick={catchEvent} className="CustomAddress">
       <span style={{ display: "inline-flex", alignItems: "center" }}>
         {!props.noBlockie && (
           <Blockies seed={address.toLowerCase()} size={8} scale={props.fontSize ? props.fontSize / 7 : 4} />
