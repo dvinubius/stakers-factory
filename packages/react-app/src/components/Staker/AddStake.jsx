@@ -39,6 +39,10 @@ const AddStake = ({ tx, price, writeContracts, forceUpdate, userBalanceZero }) =
               setPendingAddStake(false);
               forceUpdate();
             }
+            if (update && update.code) {
+              // metamask error etc.
+              setPendingAddStake(false);
+            }
           });
 
           setAddStakeAmount(0);

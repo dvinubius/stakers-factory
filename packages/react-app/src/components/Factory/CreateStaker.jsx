@@ -15,7 +15,7 @@ import CustomEtherInput from "../CustomKit/CustomEtherInput";
 import { calcSeconds, generateAltUnitText } from "./helpers";
 const { ethers } = require("ethers");
 
-const CreateStaker = ({ userSigner, gasPrice, contractConfig, localChainId, localProvider, price }) => {
+const CreateStaker = ({ userSigner, gasPrice, contractConfig, localChainId, price }) => {
   // The transactor wraps transactions and provides notificiations
   const tx = Transactor(userSigner, gasPrice);
 
@@ -43,13 +43,6 @@ const CreateStaker = ({ userSigner, gasPrice, contractConfig, localChainId, loca
   };
 
   const [form] = Form.useForm();
-  let canSubmit;
-  try {
-    const invalid = form.getFieldsError(["name", "duration", "threshold"]).some(f => f.errors.length > 0);
-    canSubmit = !invalid;
-  } catch {
-    canSubmit = false;
-  }
 
   const updateDuration = dur => {
     const unit = form.getFieldValue("durationUnit");
@@ -72,21 +65,32 @@ const CreateStaker = ({ userSigner, gasPrice, contractConfig, localChainId, loca
   };
 
   const handleSubmit = async () => {
-    setPendingCreate(true);
-    const name = form.getFieldValue("name");
-    const threshold = ethers.utils.parseUnits(form.getFieldValue("threshold"), "ether").toString();
-    const transaction = writeContracts.StakerFactory.createStakerContract(name, durationSeconds, threshold);
-    tx(transaction, update => {
-      if (update && (update.error || update.reason)) {
-        setPendingCreate(false);
-        setTxError(true);
-      }
-      if (update && (update.status === "confirmed" || update.status === 1)) {
-        setPendingCreate(false);
-        setTxSuccess(true);
-      }
-    });
-    setTxSent(true);
+    try {
+      await form.validateFields();
+      setPendingCreate(true);
+      const name = form.getFieldValue("name");
+      const threshold = ethers.utils.parseUnits(form.getFieldValue("threshold"), "ether").toString();
+      const transaction = writeContracts.StakerFactory.createStakerContract(name, durationSeconds, threshold);
+      tx(transaction, update => {
+        if (update && (update.error || update.reason)) {
+          setPendingCreate(false);
+          setTxError(true);
+        }
+        if (update && (update.status === "confirmed" || update.status === 1)) {
+          setPendingCreate(false);
+          setTxSuccess(true);
+        }
+        if (update && update.code) {
+          // metamask error etc.
+          setPendingCreate(false);
+          setTxSent(false);
+        }
+      });
+      setTxSent(true);
+    } catch (e) {
+      // form will show errors
+      console.log("Form validation failed: ", e);
+    }
   };
 
   const handleCancel = () => {
@@ -144,7 +148,6 @@ const CreateStaker = ({ userSigner, gasPrice, contractConfig, localChainId, loca
                   key={2}
                   type="primary"
                   style={{ minWidth: mediumButtonMinWidth }}
-                  disabled={!canSubmit}
                   loading={pendingCreate}
                   onClick={handleSubmit}
                 >

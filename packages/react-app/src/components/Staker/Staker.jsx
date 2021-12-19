@@ -267,6 +267,10 @@ const Staker = ({
                         setPendingUnlock(false);
                         forceUpdate();
                       }
+                      if (update && update.code) {
+                        // metamask error etc.
+                        setPendingUnlock(false);
+                      }
                     });
                   }}
                 >
@@ -330,6 +334,10 @@ const Staker = ({
                             if (update && (update.status === "confirmed" || update.status === 1)) {
                               setPendingWithdrawal(false);
                               forceUpdate();
+                            }
+                            if (update && update.code) {
+                              // metamask error etc.
+                              setPendingWithdrawal(false);
                             }
                           });
                         }}
