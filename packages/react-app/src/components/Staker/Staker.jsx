@@ -15,6 +15,7 @@ import { cardGradient, mainColWidth, primaryColor, softTextColor } from "../../s
 import { Transactor } from "../../helpers";
 import StakerBanner from "./StakerBanner";
 import StakerTimer from "./StakerTimer";
+import { getContractConfigWithInjected } from "../../helpers/getContractConfigWithInjected";
 const { ethers } = require("ethers");
 
 const Staker = ({
@@ -35,25 +36,18 @@ const Staker = ({
   const tx = Transactor(userSigner, gasPrice);
 
   /**
-   * contractConfig not from props, but we create it locally
-   * because injecting the Staker is a side effect you
-   * may not want to be felt outside this component
-   */
-  const contractConfig = { deployedContracts: deployedContracts || {}, externalContracts: externalContracts || {} };
-  injectContract({
-    contractConfig: contractConfig,
-    contractAddress: contract.address,
-    contractName: "Staker",
-    abi: injectableAbis.Staker,
-    localChainId,
-  });
-  injectContract({
-    contractConfig: contractConfig,
-    contractAddress: contract.destinationContractAddress,
-    contractName: "ExampleExternalContract",
-    abi: injectableAbis.ExampleExternalContract,
-    localChainId,
-  });
+   * contractConfig not from props,
+   * we create a copy in which we inject this particular contract
+   **/
+  const contractConfig = getContractConfigWithInjected([
+    { contractName: "Staker", abi: injectableAbis.Staker, contractAddress: contract.address, localChainId },
+    {
+      contractName: "ExampleExternalContract",
+      abi: injectableAbis.ExampleExternalContract,
+      contractAddress: contract.destinationContractAddress,
+      localChainId,
+    },
+  ]);
 
   // Load in your local 📝 contract and read a value from it:
   const readContracts = useContractLoader(localProvider, contractConfig);

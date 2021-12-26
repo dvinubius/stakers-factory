@@ -9,6 +9,7 @@ import StakerDebugHeader from "../components/Debug/StakerDebugHeader";
 import { mediumButtonMinWidth, primaryColor } from "../styles";
 import { LeftOutlined } from "@ant-design/icons";
 import StakerDebug from "../components/Debug/StakerDebug";
+import { getContractConfigWithInjected } from "../helpers/getContractConfigWithInjected";
 
 const DebugUI = ({
   factoryAddress,
@@ -78,26 +79,23 @@ const DebugUI = ({
             <div style={{ display: "flex", flexDirection: "column", gap: "2rem" }}>
               {stakerContracts.map(stakerContract => {
                 /**
-                 * define config locally since injection has side effects
-                 */
-                const contractCfg = {
-                  deployedContracts: deployedContracts || {},
-                  externalContracts: externalContracts || {},
-                };
-                injectContract({
-                  contractConfig: contractCfg,
-                  contractAddress: stakerContract.address,
-                  contractName: "Staker",
-                  abi: injectableAbis.Staker,
-                  localChainId,
-                });
-                injectContract({
-                  contractConfig: contractCfg,
-                  contractAddress: stakerContract.destinationContractAddress,
-                  contractName: "ExampleExternalContract",
-                  abi: injectableAbis.ExampleExternalContract,
-                  localChainId,
-                });
+                 * contractConfig not from props,
+                 * we create a copy in which we inject this particular contract
+                 **/
+                const contractCfg = getContractConfigWithInjected([
+                  {
+                    contractName: "Staker",
+                    abi: injectableAbis.Staker,
+                    contractAddress: stakerContract.address,
+                    localChainId,
+                  },
+                  {
+                    contractName: "ExampleExternalContract",
+                    abi: injectableAbis.ExampleExternalContract,
+                    contractAddress: stakerContract.destinationContractAddress,
+                    localChainId,
+                  },
+                ]);
                 const handleOpen = () =>
                   setOpenedDebugStaker({
                     staker: stakerContract,
