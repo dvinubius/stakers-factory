@@ -2,6 +2,9 @@
 
 ## 🤩 [Try on Rinkeby](https://dvinubius-stakers-factory.surge.sh/)
 
+![stakers_factory](https://user-images.githubusercontent.com/32189942/156658272-074e43f5-86f4-4de3-baf9-4fecf7d5304e.png)
+
+
 ## scaffold-eth
 - Unlike the starter code in the scaffold-eth-challenges repo, this one is based on a recent **Scaffold Eth master** (10 dec 2021)
 ## factory
